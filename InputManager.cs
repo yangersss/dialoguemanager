@@ -11,25 +11,37 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(PlayerInput))]
 public class InputManager : MonoBehaviour
 {
-    private InputAction submit;
-    private bool submitPressed;
+    //private InputAction submit;
+    private bool submitPressed = false;
 
-    public Controls playerControls;
+    private static InputManager instance;
 
-    private void OnEnable(){
-        submit = playerControls.Game.Submit;
-        submit.Enable();
-        submit.performed += Submit;
-    }
+    //public Controls playerControls;
 
-    private void onDisable(){
-        submit.Disable();
-    }
+    // private void OnEnable(){
+    //     submit = playerControls.Game.Submit;
+    //     submit.Enable();
+    //     submit.performed += Submit;
+    // }
+
+    // private void onDisable(){
+    //     submit.Disable();
+    // }
 
     private void Awake(){
-        playerControls = new Controls();  
+        //defensive programming
+        if (instance != null){
+            Debug.LogError("Found more than one Input Manager in the scene.");
+        }
+        instance = this;
+        //playerControls = new Controls();  
     }
-    private void Submit(InputAction.CallbackContext context){
+    
+    public static InputManager GetInstance(){
+        return instance;
+    }
+
+    public void SubmitPressed(InputAction.CallbackContext context){
         if (context.performed){
             submitPressed = true;
         }
@@ -38,9 +50,17 @@ public class InputManager : MonoBehaviour
         }
     }
     
+    // for any of the below 'Get' methods, if we're getting it then we're also using it,
+    // which means we should set it to false so that it can't be used again until actually
+    // pressed again.
+
     public bool GetSubmitPressed(){
         bool result = submitPressed;
         submitPressed = false;
         return result;
+    }
+
+    public void RegisterSubmitPressed(){
+        submitPressed = false;
     }
 }

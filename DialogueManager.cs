@@ -7,7 +7,7 @@ using UnityEngine.EventSystems;
 
 public class DialogueManager : MonoBehaviour
 {
-    public InputManager inputman;
+    //public InputManager inputman;
 
     [Header("Params")]
     [SerializeField] private float typingSpeed = 0.08f;
@@ -73,7 +73,7 @@ public class DialogueManager : MonoBehaviour
 
         //handle continuing to the next line in the dialogue when submit is pressed
         if (canContinueToNextLine && 
-        inputman.GetSubmitPressed()){
+        InputManager.GetInstance().GetSubmitPressed()){
             ContinueStory();
         }
     }
@@ -131,7 +131,7 @@ public class DialogueManager : MonoBehaviour
         // display each letter one at a time
         foreach(char letter in line.ToCharArray()){
             //if the submit button is pressed, finish up displaying the line right away
-            if (inputman.GetSubmitPressed()){
+            if (InputManager.GetInstance().GetSubmitPressed()){
                 dialogueText.text = line;
                 break;
             }
