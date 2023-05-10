@@ -7,7 +7,7 @@ using UnityEngine.EventSystems;
 
 public class DialogueManager : MonoBehaviour
 {
-    //public InputManager inputman;
+    public InputManager inputman;
 
     [Header("Params")]
     [SerializeField] private float typingSpeed = 0.08f;
@@ -73,7 +73,7 @@ public class DialogueManager : MonoBehaviour
 
         //handle continuing to the next line in the dialogue when submit is pressed
         if (canContinueToNextLine && 
-        InputManager.GetInstance().GetSubmitPressed()){
+        inputman.GetSubmitPressed()){
             ContinueStory();
         }
     }
@@ -103,10 +103,11 @@ public class DialogueManager : MonoBehaviour
         if (currentStory.canContinue){
             // set text for the current dialogue line
             // if last line of dialogue is typing and we continue, skip to next line
-            if (displayLineCoroutine != null){
-                StopCoroutine(displayLineCoroutine);
-            }
-            displayLineCoroutine = StartCoroutine(DisplayLine(currentStory.Continue()));
+            // if (displayLineCoroutine != null){
+            //     StopCoroutine(displayLineCoroutine);
+            // }
+            // displayLineCoroutine = StartCoroutine(DisplayLine(currentStory.Continue()));
+            DisplayLine(currentStory.Continue());
 
             // handle tags
             HandleTags(currentStory.currentTags);
@@ -117,7 +118,7 @@ public class DialogueManager : MonoBehaviour
     }
 
     // instead of showing string all at once, make coroutine that dispalys one letter at a time
-    private IEnumerator DisplayLine(string line){
+    private void DisplayLine(string line){
         // empty the dialogue text
         dialogueText.text = "";
         //hide items while text is typing
@@ -127,11 +128,13 @@ public class DialogueManager : MonoBehaviour
         canContinueToNextLine = false;
         bool isAddingRichTextTag = false;
 
+        float endTime = typingSpeed * 10;
+        float currentTime = 0f;
 
         // display each letter one at a time
         foreach(char letter in line.ToCharArray()){
             //if the submit button is pressed, finish up displaying the line right away
-            if (InputManager.GetInstance().GetSubmitPressed()){
+            if (inputman.GetSubmitPressed()){
                 dialogueText.text = line;
                 break;
             }
@@ -146,9 +149,12 @@ public class DialogueManager : MonoBehaviour
             }
             //if not rich text, add the next letter and wait a small time
             else{
-                dialogueText.text += letter;
-                yield return new WaitForSeconds(typingSpeed);
+                if (currentTime >= endTime){
+                    currentTime = 0;
+                    dialogueText.text += letter;
+                }
             }
+            currentTime += Time.deltaTime;
         }
         //actions to take after the entire line has finished
         continueIcon.SetActive(true);
