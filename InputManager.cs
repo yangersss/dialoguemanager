@@ -11,37 +11,27 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(PlayerInput))]
 public class InputManager : MonoBehaviour
 {
-    //private InputAction submit;
-    private bool submitPressed = false;
+    private InputAction submit;
+    private bool submitPressed;
 
-    private static InputManager instance;
+    public Controls playerControls;
 
-    //public Controls playerControls;
+    private bool submitReleased = true;
 
-    // private void OnEnable(){
-    //     submit = playerControls.Game.Submit;
-    //     submit.Enable();
-    //     submit.performed += Submit;
-    // }
+    private void OnEnable(){
+        submit = playerControls.Game.Submit;
+        submit.Enable();
+        submit.performed += Submit;
+    }
 
-    // private void onDisable(){
-    //     submit.Disable();
-    // }
+    private void onDisable(){
+        submit.Disable();
+    }
 
     private void Awake(){
-        //defensive programming
-        if (instance != null){
-            Debug.LogError("Found more than one Input Manager in the scene.");
-        }
-        instance = this;
-        //playerControls = new Controls();  
+        playerControls = new Controls();  
     }
-    
-    public static InputManager GetInstance(){
-        return instance;
-    }
-
-    public void SubmitPressed(InputAction.CallbackContext context){
+    private void Submit(InputAction.CallbackContext context){
         if (context.performed){
             submitPressed = true;
         }
@@ -50,17 +40,18 @@ public class InputManager : MonoBehaviour
         }
     }
     
-    // for any of the below 'Get' methods, if we're getting it then we're also using it,
-    // which means we should set it to false so that it can't be used again until actually
-    // pressed again.
-
     public bool GetSubmitPressed(){
-        bool result = submitPressed;
-        submitPressed = false;
-        return result;
-    }
+        Debug.Log("pRESSED" + submitPressed);
+        Debug.Log("relseaed" + submitReleased);
+        if (!submitPressed){
+            submitReleased = true;
+        } 
 
-    public void RegisterSubmitPressed(){
-        submitPressed = false;
+        if (submitReleased && submitPressed){
+            submitReleased = false;
+            return true;
+        } 
+        
+        return false;
     }
 }
