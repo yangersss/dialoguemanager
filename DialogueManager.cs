@@ -31,10 +31,6 @@ public class DialogueManager : MonoBehaviour
     private bool dialogueIsPlaying;
     private bool canContinueToNextLine = false;
     private Coroutine displayLineCoroutine;
-    private bool canSkip = false;
-    private bool submitSkip;
-
-    private bool testContinueDown = false;
 
     private static DialogueManager instance;
 
@@ -71,15 +67,6 @@ public class DialogueManager : MonoBehaviour
     }
 
     private void Update() {
-        if (inputman.GetSubmitPressed()){
-            testContinueDown = true;
-            testContinueDown = false;
-        }
-
-        if (inputman.GetSubmitPressed()){
-            submitSkip = true;
-        }
-        
         if (!dialogueIsPlaying) { //return right away if dialogue isn't playing
             return;
         }
@@ -137,17 +124,14 @@ public class DialogueManager : MonoBehaviour
         continueIcon.SetActive(false);
         HideChoices();
 
-        submitSkip = false;
         canContinueToNextLine = false;
         bool isAddingRichTextTag = false;
 
-        StartCoroutine(CanSkip());
 
         // display each letter one at a time
         foreach(char letter in line.ToCharArray()){
             //if the submit button is pressed, finish up displaying the line right away
-            if (testContinueDown){
-                submitSkip = false;
+            if (inputman.GetSubmitPressed()){
                 dialogueText.text = line;
                 break;
             }
@@ -171,7 +155,6 @@ public class DialogueManager : MonoBehaviour
         // display choices, if any, for this dialogue line
         DisplayChoices();
         canContinueToNextLine = true;
-        canSkip = false;
     }
 
     //loops thru choices and inactivates them
@@ -179,12 +162,6 @@ public class DialogueManager : MonoBehaviour
         foreach (GameObject choiceButton in choices){
             choiceButton.SetActive(false);
         }
-    }
-
-    private IEnumerator CanSkip(){
-        canSkip = false; //make sure var is false
-        yield return new WaitForSeconds(0.5f);
-        canSkip = true;
     }
 
     //gives stringlist of all tags for current dialogue
