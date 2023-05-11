@@ -7,7 +7,7 @@ using UnityEngine.EventSystems;
 
 public class DialogueManager : MonoBehaviour
 {
-    //public InputManager inputman;
+    public InputManager inputman;
 
     [Header("Params")]
     [SerializeField] private float typingSpeed = 0.08f;
@@ -18,14 +18,12 @@ public class DialogueManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI dialogueText;
     [SerializeField] private TextMeshProUGUI displayNameText;
     [SerializeField] private Animator portraitAnimator;
-    
 
     [Header("Choices UI")]
     [SerializeField] private GameObject[] choices;
     
     private Animator layoutAnimator;
     private TextMeshProUGUI[] choicesText;
-
 
     private Story currentStory;
     private bool dialogueIsPlaying;
@@ -40,6 +38,7 @@ public class DialogueManager : MonoBehaviour
     private const string LAYOUT_TAG = "layout";
 
     private void Awake() {
+        //defensive programming to ensure singleton
         if (instance != null) {
             Debug.LogWarning("Found more than one Dialogue manager in the scene");
         }
@@ -72,18 +71,18 @@ public class DialogueManager : MonoBehaviour
         }
 
         //handle continuing to the next line in the dialogue when submit is pressed
-        if (canContinueToNextLine && 
-        InputManager.GetInstance().GetSubmitPressed()){
+        if (canContinueToNextLine && inputman.GetSubmitPressed()){
             ContinueStory();
         }
     }
 
+    //called by DialogueTrigger script
     public void EnterDialogueMode(TextAsset inkJSON){
         currentStory = new Story(inkJSON.text);
         dialogueIsPlaying = true;
         dialoguePanel.SetActive(true);
 
-        // reset portrait, layout, and speaker
+        // reset portrait, layout, and speaker to default placeholders
         displayNameText.text = "???";
         portraitAnimator.Play("default");
         layoutAnimator.Play("right");
@@ -108,7 +107,7 @@ public class DialogueManager : MonoBehaviour
             }
             displayLineCoroutine = StartCoroutine(DisplayLine(currentStory.Continue()));
 
-            // handle tags
+            // handle tags from ink file
             HandleTags(currentStory.currentTags);
         }
         else{
@@ -116,7 +115,7 @@ public class DialogueManager : MonoBehaviour
         }
     }
 
-    // instead of showing string all at once, make coroutine that dispalys one letter at a time
+    // instead of showing string all at once, make coroutine that displays one letter at a time
     private IEnumerator DisplayLine(string line){
         // empty the dialogue text
         dialogueText.text = "";
@@ -131,7 +130,7 @@ public class DialogueManager : MonoBehaviour
         // display each letter one at a time
         foreach(char letter in line.ToCharArray()){
             //if the submit button is pressed, finish up displaying the line right away
-            if (InputManager.GetInstance().GetSubmitPressed()){
+            if (inputman.GetSubmitPressed()){
                 dialogueText.text = line;
                 break;
             }
@@ -174,9 +173,9 @@ public class DialogueManager : MonoBehaviour
             if (splitTag.Length != 2){
                 Debug.LogError("Tag could not be appropriately parse: " + tag);
             }
+            
             string tagKey = splitTag[0].Trim();
             string tagValue = splitTag[1].Trim();
-
             //handle the tag
             switch (tagKey){
                 case SPEAKER_TAG:
@@ -231,6 +230,5 @@ public class DialogueManager : MonoBehaviour
             currentStory.ChooseChoiceIndex(choiceIndex);
             ContinueStory();
         }
-        
     }
 }
