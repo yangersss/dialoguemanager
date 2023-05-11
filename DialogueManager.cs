@@ -27,6 +27,7 @@ public class DialogueManager : MonoBehaviour
 
     private Story currentStory;
     private bool dialogueIsPlaying;
+    //this bool only allows player to go to next line of dialogue after current one is finished
     private bool canContinueToNextLine = false;
     private Coroutine displayLineCoroutine;
 
@@ -71,7 +72,9 @@ public class DialogueManager : MonoBehaviour
         }
 
         //handle continuing to the next line in the dialogue when submit is pressed
-        if (canContinueToNextLine && inputman.GetSubmitPressed()){
+        if (canContinueToNextLine && 
+        currentStory.currentChoices.Count == 0 && 
+        inputman.GetSubmitPressed()) {
             ContinueStory();
         }
     }
@@ -117,6 +120,7 @@ public class DialogueManager : MonoBehaviour
 
     // instead of showing string all at once, make coroutine that displays one letter at a time
     private IEnumerator DisplayLine(string line){
+        
         //set the text to the full line, but set the visible characters to 0
         dialogueText.text = line;
         dialogueText.maxVisibleCharacters = 0;
